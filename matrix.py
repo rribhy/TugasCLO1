@@ -104,7 +104,6 @@ for trainset, testset in kf.split(data):
     algo.fit(trainset)
     predictions = algo.test(testset)
 
-    # --- METRIK REGRESI ---
     rmse = accuracy.rmse(predictions, verbose=False)
     mae = accuracy.mae(predictions, verbose=False)
     mse = accuracy.mse(predictions, verbose=False)
@@ -113,12 +112,9 @@ for trainset, testset in kf.split(data):
     variance_of_ratings = np.var(true_ratings_np)
     nmse = mse / variance_of_ratings if variance_of_ratings > 0 else 0
 
-    # --- METRIK KLASFIKASI (accuracy, precision, recall, f1) ---
-    # y_true: rating sebenarnya, y_pred: rating hasil prediksi dibulatkan
     y_true = np.array([pred.r_ui for pred in predictions])
     y_pred = np.array([round(pred.est) for pred in predictions])
 
-    # batasi ke dalam rentang 1-5 (jaga-jaga jika keluar rentang)
     y_pred = np.clip(y_pred, 1, 5)
 
     acc = accuracy_score(y_true, y_pred)
@@ -131,7 +127,6 @@ for trainset, testset in kf.split(data):
     recall_scores.append(rec)
     f1_scores.append(f1)
 
-    # --- NDCG ---
     true_items_by_user = defaultdict(dict)
     recs_by_user = defaultdict(list)
     for pred in predictions:
@@ -154,7 +149,6 @@ for trainset, testset in kf.split(data):
     nmse_scores.append(nmse)
     ndcg_scores.append(fold_ndcg)
 
-# rata-rata semua metrik
 rmse_hasil = np.mean(rmse_scores)
 mae_hasil = np.mean(mae_scores)
 mse_hasil = np.mean(mse_scores)

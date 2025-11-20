@@ -83,7 +83,6 @@ user_counts = ratings['user_id'].value_counts()
 active_users = user_counts[user_counts >= 10].index[:10000]
 ratings_small = ratings[ratings['user_id'].isin(active_users)].copy()
 
-# 2. (Opsional) Batasi juga jumlah buku, misal 3000 buku terpopuler
 book_counts = ratings_small['book_id'].value_counts()
 popular_books = book_counts.index[:3000]
 ratings_small = ratings_small[ratings_small['book_id'].isin(popular_books)]
@@ -92,7 +91,6 @@ print("Jumlah user unik:", ratings_small['user_id'].nunique())
 print("Jumlah buku unik:", ratings_small['book_id'].nunique())
 print("Jumlah baris rating:", len(ratings_small))
 
-# 3. Pakai ratings_small untuk Surprise, bukan ratings penuh
 reader = Reader(rating_scale=(1, 5))
 data = Dataset.load_from_df(
     ratings_small[['user_id', 'book_id', 'rating']],
@@ -123,7 +121,6 @@ for trainset, testset in kf.split(data):
     algo.fit(trainset)
     predictions = algo.test(testset)
 
-    # --- Metrik regresi ---
     rmse = accuracy.rmse(predictions, verbose=False)
     mae = accuracy.mae(predictions, verbose=False)
     mse = accuracy.mse(predictions, verbose=False)
@@ -132,9 +129,6 @@ for trainset, testset in kf.split(data):
     variance_of_ratings = np.var(true_ratings_np)
     nmse = mse / variance_of_ratings if variance_of_ratings > 0 else 0
 
-    # --- Metrik klasifikasi (accuracy, precision, recall, F1) ---
-    # y_true: apakah rating aktual relevan
-    # y_pred: apakah rating prediksi relevan
     y_true = np.array([1 if pred.r_ui >= relevance_threshold else 0 for pred in predictions])
     y_pred = np.array([1 if pred.est >= relevance_threshold else 0 for pred in predictions])
 
@@ -148,7 +142,6 @@ for trainset, testset in kf.split(data):
     recall_scores.append(fold_recall)
     f1_scores.append(fold_f1)
 
-    # --- NDCG seperti sebelumnya ---
     true_items_by_user = defaultdict(dict)
     recs_by_user = defaultdict(list)
     for pred in predictions:
@@ -170,7 +163,6 @@ for trainset, testset in kf.split(data):
     nmse_scores.append(nmse)
     ndcg_scores.append(fold_ndcg)
 
-# Rata-rata semua metrik
 rmse_hasil = np.mean(rmse_scores)
 mae_hasil = np.mean(mae_scores)
 mse_hasil = np.mean(mse_scores)

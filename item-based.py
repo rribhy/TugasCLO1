@@ -105,7 +105,6 @@ for trainset, testset in kf.split(data):
     algo.fit(trainset)
     predictions = algo.test(testset)
 
-    # --- Metrik regresi ---
     rmse = accuracy.rmse(predictions, verbose=False)
     mae = accuracy.mae(predictions, verbose=False)
     mse = accuracy.mse(predictions, verbose=False)
@@ -114,9 +113,6 @@ for trainset, testset in kf.split(data):
     variance_of_ratings = np.var(true_ratings_np)
     nmse = mse / variance_of_ratings if variance_of_ratings > 0 else 0
 
-    # --- Metrik klasifikasi (accuracy, precision, recall, F1) ---
-    # y_true: apakah rating aktual relevan
-    # y_pred: apakah rating prediksi relevan
     y_true = np.array([1 if pred.r_ui >= relevance_threshold else 0 for pred in predictions])
     y_pred = np.array([1 if pred.est >= relevance_threshold else 0 for pred in predictions])
 
@@ -130,7 +126,6 @@ for trainset, testset in kf.split(data):
     recall_scores.append(fold_recall)
     f1_scores.append(fold_f1)
 
-    # --- NDCG seperti sebelumnya ---
     true_items_by_user = defaultdict(dict)
     recs_by_user = defaultdict(list)
     for pred in predictions:
@@ -152,7 +147,6 @@ for trainset, testset in kf.split(data):
     nmse_scores.append(nmse)
     ndcg_scores.append(fold_ndcg)
 
-# Rata-rata semua metrik
 rmse_hasil = np.mean(rmse_scores)
 mae_hasil = np.mean(mae_scores)
 mse_hasil = np.mean(mse_scores)
